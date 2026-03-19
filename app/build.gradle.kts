@@ -1,6 +1,7 @@
 plugins {
     application
     checkstyle
+    jacoco
     id("org.sonarqube") version "7.1.0.6387"
 }
 
@@ -33,6 +34,15 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+    finalizedBy(tasks.jacocoTestReport)
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
 }
 
 application {
@@ -49,5 +59,9 @@ sonar {
     properties {
         property("sonar.projectKey", "GypsyJR777_java-project-78")
         property("sonar.organization", "gypsyjr777")
+        property(
+            "sonar.coverage.jacoco.xmlReportPaths",
+            layout.buildDirectory.file("reports/jacoco/test/jacocoTestReport.xml").get().asFile.path,
+        )
     }
 }
