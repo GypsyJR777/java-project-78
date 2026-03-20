@@ -1,5 +1,5 @@
 plugins {
-    application
+    java
     checkstyle
     jacoco
     id("org.sonarqube") version "7.1.0.6387"
@@ -43,10 +43,6 @@ tasks.jacocoTestReport {
         xml.required.set(true)
         html.required.set(true)
     }
-}
-
-application {
-    mainClass = "hexlet.code.App"
 }
 
 java {
