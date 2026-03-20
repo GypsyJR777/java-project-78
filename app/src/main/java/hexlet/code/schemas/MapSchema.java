@@ -8,8 +8,6 @@ import java.util.Objects;
  * Schema for validating map values.
  */
 public final class MapSchema extends BaseSchema<Map<?, ?>> {
-    private Map<String, BaseSchema<?>> schemaByKey = new LinkedHashMap<>();
-
     /**
      * Makes a map required.
      *
@@ -38,22 +36,14 @@ public final class MapSchema extends BaseSchema<Map<?, ?>> {
      * @return current schema
      */
     public MapSchema shape(final Map<String, ? extends BaseSchema<?>> schemas) {
-        schemaByKey = new LinkedHashMap<>(schemas);
-        addRule("shape", value -> value == null || schemaByKey.entrySet().stream()
-                .allMatch(entry -> isValidBySchema(entry.getValue(), value.get(entry.getKey()))));
+        var shapeSchemas = new LinkedHashMap<>(schemas);
+        addRule("shape", value -> value == null || shapeSchemas.entrySet().stream().allMatch(entry -> {
+            try {
+                return ((BaseSchema) entry.getValue()).isValid(value.get(entry.getKey()));
+            } catch (ClassCastException e) {
+                return false;
+            }
+        }));
         return this;
-    }
-
-    private static boolean isValidBySchema(final BaseSchema<?> schema, final Object value) {
-        return isValidBySchemaTyped(schema, value);
-    }
-
-    private static <T> boolean isValidBySchemaTyped(final BaseSchema<T> schema, final Object value) {
-        try {
-            T typedValue = (T) value;
-            return schema.isValid(typedValue);
-        } catch (ClassCastException e) {
-            return false;
-        }
     }
 }
